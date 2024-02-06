@@ -1,0 +1,50 @@
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2024 Jeremy Brubaker <jbru362@gmail.com>
+#
+- hosts: all
+  vars_files:
+    - vars/main.yaml
+  tasks:
+
+  - name: Set ansible debug output to sane defaults
+    import_tasks: tasks/fix_debug.yaml
+    vars:
+      cfg_file: ~/.ansible.cfg
+    tags:
+      - fix_debug
+      - never
+
+  - name: Install tar(1) wrapper
+    copy:
+      src: files/tar
+      dest: "{{item}}"
+      mode: 0755
+    with_first_found:
+      - ~/bin
+      - ~/.local/bin
+
+  - name: Get {{ansible_user_id}}'s UID
+    getent:
+      database: passwd
+
+  - name: Set UID
+    set_fact:
+      uid: "{{getent_passwd[ansible_user_id].2}}"
+
+  - name: Create {{config_home}}/lxc/default.conf    
+    template:
+      src: templates/default.conf.j2
+      dest: "{{config_home}}/lxc/default.conf"
+

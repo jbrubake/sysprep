@@ -1,0 +1,83 @@
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2024 Jeremy Brubaker <jbru362@gmail.com>
+#
+- hosts: all
+  vars_files:
+    - vars/main.yaml
+
+  tasks:
+
+  - name: Set ansible debug output to sane defaults
+    import_tasks: tasks/fix_debug.yaml
+    tags:
+      - fix_debug
+      - never
+
+  - name: Install packages
+    package:
+      name: "{{item}}"
+      state: latest
+    loop:
+      - lxc
+      - lxc-templates
+      - python3-lxc
+
+  - name: Start services
+    service:
+      name: "{{item}}"
+      enabled: true
+      state: started
+    loop:
+      - lxc-net
+
+  - name: Add lxc bridge to trusted zone
+    notify: Reload firewalld
+    firewalld:
+      zone: trusted
+      interface: "{{lxcbr}}"
+      permanent: true
+      state: enabled
+
+  - name: Check for lxc SELinux module
+    shell: semodule -l | grep '^lxc$'
+    register: _out
+    changed_when: false
+
+  - name: Install lxc SELinux module
+    command: semodule -i files/lxc.pp
+    when: _out.rc != 0
+
+  - name: Create /etc/sub{u,g}id entry
+    lineinfile:
+      path: /etc/{{item}}
+      search_string: ^"{{user}}"
+      line: "{{user}}:{{id_start}}:{{id_num}}"
+    loop:
+      - subuid
+      - subgid
+
+  - name: Create /etc/lxc/lxc-usernet entry
+    lineinfile:
+      path: /etc/lxc/lxc-usernet
+      search_string: ^"{{user}}
+      line: "{{user}} veth {{lxcbr}} {{max_lxc_if}}"
+
+  handlers:
+
+  - name: Reload firewalld
+    service:
+      name: firewalld
+      state: reloaded
+

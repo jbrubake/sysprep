@@ -1,0 +1,18 @@
+module lxc 1.0;
+
+require {
+	type unconfined_t;
+	type container_runtime_t;
+	type data_home_t;
+	class file entrypoint;
+}
+
+#============= container_runtime_t ==============
+
+#!!!! This avc is allowed in the current policy
+allow container_runtime_t data_home_t:file entrypoint;
+
+#============= unconfined_t ==============
+
+#!!!! This avc is allowed in the current policy
+allow unconfined_t data_home_t:file entrypoint;

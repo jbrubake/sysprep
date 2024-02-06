@@ -1,0 +1,16 @@
+#
+# {{ansible_managed}}
+#
+
+lxc.include = /etc/lxc/default.conf
+
+# This configuration is required to handle a bug with
+# exporting non-privileged containers using Packer
+lxc.idmap = u 0 {{id_start}} {{uid|int - 1}}
+lxc.idmap = u {{uid}} {{uid}} 1
+lxc.idmap = u {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
+
+lxc.idmap = g 0 {{id_start}} {{uid|int - 1}}
+lxc.idmap = g {{uid}} {{uid}} 1
+lxc.idmap = g {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
+

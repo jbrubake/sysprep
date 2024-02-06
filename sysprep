@@ -1,0 +1,120 @@
+#!/bin/sh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright 2024 Jeremy Brubaker <jbru362@gmail.com>
+#
+# abstract: prepare your system to create Packer LXC containers
+#
+# Defaults {{{1
+#
+LXCBR_DFLT=lxcbr0
+MAX_LXC_IF_DFLT=10
+
+# Configuration {{{1
+#
+FIX_DEBUG=fix_debug
+
+# Documentation {{{1
+#
+VERSION='1.0'
+
+print_help() {
+    cat <<EOF
+Usage: setup [OPTION]
+Prepare a Fedora system to run Packer, OpenTofu and Ansible
+
+ -d                set Ansible debug output to sane settings
+ -b [NAME]         lxc bridge interface (default = $LXCBR_DFLT)
+ -n [NUM]          number of interfaces to allow the user (default = $MAX_LXC_IF_DFLT)
+ -v                display version information
+ -h                display this help
+EOF
+
+}
+print_version() {
+    cat <<END >&2
+$0 $VERSION
+Copyright (C) 2024 Orion Arts
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Jeremy Brubaker.
+END
+}
+
+# Process options {{{1
+#
+lxcbr=$LXCBR_DFLT
+max_lxc_if=$MAX_LXC_IF_DFLT
+fix_debug=
+
+while getopts ":db:n:vh" opt; do
+    case $opt in
+        d) fix_debug=y ;;
+        b) lxcbr=$OPTARG ;;
+        n) max_lxc_if=$OPTARG ;;
+        v) print_version; exit ;;
+        h) print_help; exit ;;
+        *) print_help; exit ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+# Main {{{1
+#
+printf "%s\n" "Prepping sudo..."
+sudo true >/dev/null
+echo
+
+printf "%s\n" "Installing ansible..."
+echo
+sudo dnf install -y ansible
+echo
+
+# System configuration {{{2
+#
+
+# Adjust debug output settings {{{3
+#
+if [ -n "$fix_debug" ]; then
+    printf "%s\n" "Configuring ansible debug output..."
+    sudo ansible-playbook -i localhost, -c local --tags "$FIX_DEBUG" system.yaml || exit 1
+fi
+
+printf "%s\n" "System configuration..."
+user=$(id -un)
+sudo ansible-playbook -i localhost, -c local \
+    -e "user=$user" \
+    -e "lxcbr=$lxcbr" \
+    -e "max_lxc_if=$max_lxc_if" \
+    system.yaml || exit 1
+
+# Personal configuration {{{2
+#
+printf "%s's configuration...\n" "$user"
+config_home=${XDG_CONFIG_HOME:-~/.config}
+
+# Adjust debug output settings {{{3
+#
+if [ -n "$fix_debug" ]; then
+    printf "%s\n" "Configuring ansible debug output..."
+    ansible-playbook -i localhost, -c local --tags "$FIX_DEBUG" user.yaml || exit 1
+fi
+
+ansible-playbook -i localhost, -c local \
+    -e "config_home=$config_home" \
+    user.yaml || exit 1
+
