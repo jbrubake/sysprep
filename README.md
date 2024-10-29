@@ -6,13 +6,17 @@ sysprep - prepare your system to create Packer LXC containers
 
 **sysprep** *[OPTION]*
 
-*(*`sysprep` *must be run from its own directory to have access to its supporting files.)*
+*(*`sysprep` *must be run from its own directory to have access to its
+supporting files.)*
 
 # Description
 
-Install necessary system packages, configure system files and configure personal files to allow creation of LXC containers using Packer. `sysprep` currently supports only **Fedora**.
+Install necessary system packages, configure system files and configure personal
+files to allow creation of LXC containers using Packer. `sysprep` currently
+supports only **Fedora**.
 
-`sysprep` has nothing to do with the MS Windows `sysprep` tool. I just found the name appropraite and mildly humorous.
+`sysprep` has nothing to do with the MS Windows `sysprep` tool. I just found the
+name appropraite and mildly humorous.
 
 ## Options
 
@@ -28,5 +32,5 @@ Install necessary system packages, configure system files and configure personal
 
 # Author
 
-Jeremy Brubaker [jbrubake@orionarts.dev](mailto:jbru362@gmail.com)
+Jeremy Brubaker [jbrubake@orionarts.io](mailto:jbrubake@orionarts.io
 

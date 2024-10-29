@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License along with
 # sysprep. If not, see <https://www.gnu.org/licenses/>. 
 #
-# Copyright 2024 Jeremy Brubaker <jbrubake@orionarts.dev>
+# Copyright 2024 Jeremy Brubaker <jbrubake@orionarts.io>
 #
 id_start: 524288
 id_num: 65536
