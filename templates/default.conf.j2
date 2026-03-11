@@ -14,4 +14,9 @@ lxc.idmap = u {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
 lxc.idmap = g 0 {{id_start}} {{uid|int - 1}}
 lxc.idmap = g {{uid}} {{uid}} 1
 lxc.idmap = g {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
+# Add uncovered mounts of proc and sys, else unprivileged users
+# cannot remount those
+
+lxc.mount.entry = proc dev/.lxc/proc proc create=dir,optional 0 0
+lxc.mount.entry = sys dev/.lxc/sys sysfs create=dir,optional 0 0
 
