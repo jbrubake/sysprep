@@ -32,5 +32,5 @@ name appropraite and mildly humorous.
 
 # Author
 
-Jeremy Brubaker [jbrubake@orionarts.io](mailto:jbrubake@orionarts.io
+Jeremy Brubaker [jbrubake@orionarts.io](mailto:jbrubake@orionarts.io)
 
