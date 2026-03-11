@@ -13,19 +13,14 @@
 #
 # Copyright 2024 Jeremy Brubaker <jbru362@gmail.com>
 #
-- name: Fix stdout
+- name: Fix debug output
   ini_file:
     path: "{{cfg_file | default('/etc/ansible/ansible.cfg')}}"
     section: defaults
-    option: stdout_callback
+    option: "{{item}}_callback"
     value: debug
     mode: 0644
-
-- name: Fix stderr
-  ini_file:
-    path: "{{cfg_file | default('/etc/ansible/ansible.cfg')}}"
-    section: defaults
-    option: stderr_callback
-    value: debug
-    mode: 0644
+  loop:
+    - stdout
+    - stderr
 
