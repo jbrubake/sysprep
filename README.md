@@ -2,7 +2,7 @@
 
 sysprep - prepare your system to create Packer LXC containers
 
-# Synposis
+# Synopsis
 
 **sysprep** *[OPTION]*
 
