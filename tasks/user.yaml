@@ -1,0 +1,28 @@
+---
+
+- name: Check for tar(1) wrapper
+  shell: type tar-packer-lxc-wrapper
+  register: _has_tar
+  failed_when: false
+  changed_when: false
+
+- name: Install tar(1) wrapper
+  copy:
+    src: "{{packer_lxc__tar_wrapper}}"
+    dest: "{{[ansible_env.HOME, packer_lxc__user_bindir] | path_join}}"
+    mode: 0755
+  when: _has_tar.rc != 0
+
+- name: Get UID
+  getent:
+    database: passwd
+
+- name: Create $XDG_CONFIG_HOME/lxc/default.conf    
+  template:
+    src: templates/default.conf.j2
+    dest: "{{packer_lxc__config_home}}/lxc/default.conf"
+  vars:
+    id_start: "{{packer_lxc__id_start}}"
+    id_num:   "{{packer_lxc__id_num}}"
+    uid:      "{{getent_passwd[ansible_user_id].2}}"
+

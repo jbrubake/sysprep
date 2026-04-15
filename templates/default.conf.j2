@@ -9,11 +9,17 @@ lxc.include = /etc/lxc/default.conf
 # exporting non-privileged containers using Packer
 lxc.idmap = u 0 {{id_start}} {{uid|int - 1}}
 lxc.idmap = u {{uid}} {{uid}} 1
-lxc.idmap = u {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
+lxc.idmap = u {{uid|int + 1}} {{id_start|int + uid|int}} {{id_num|int- uid|int}}
 
 lxc.idmap = g 0 {{id_start}} {{uid|int - 1}}
 lxc.idmap = g {{uid}} {{uid}} 1
-lxc.idmap = g {{uid|int + 1}} {{id_start + uid|int}} {{id_num - uid|int}}
+lxc.idmap = g {{uid|int + 1}} {{id_start|int + uid|int}} {{id_num|int - uid|int}}
+
+# TODO: What was this?
+# Use a profile which allows nesting
+# lxc.apparmor.profile = lxc-container-default-with-nesting
+# lxc.apparmor.allow_nesting = 1
+
 # Add uncovered mounts of proc and sys, else unprivileged users
 # cannot remount those
 

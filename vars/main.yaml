@@ -1,19 +1,9 @@
-# This file is part of sysprep.
-#
-# sysprep is free software: you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation, either version 3 of the License, or (at your option) any later
-# version.
-#
-# sysprep is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along with
-# sysprep. If not, see <https://www.gnu.org/licenses/>. 
-#
-# Copyright 2024 Jeremy Brubaker <jbrubake@orionarts.io>
-#
-id_start: 524288
-id_num: 65536
+packer_lxc__packages:
+  - lxc
+  - lxc-templates
+  - python3-lxc
+
+packer_lxc__tar_wrapper: files/tar-packer-lxc-wrapper
+
+packer_lxc__config_home: "{{ansible_env.XDG_CONFIG_HOME | d([ansible_env.HOME, '.config'] | path_join)}}"
 

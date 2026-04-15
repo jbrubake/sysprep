@@ -1,0 +1,10 @@
+---
+
+packer_lxc__id_start:    "{{packer_lxc.id_start    | d(524289)}}"
+packer_lxc__id_num:      "{{packer_lxc.id_num      | d(65536)}}"
+packer_lxc__lxcbr:       "{{packer_lxc.lxcbr       | d('lxcbr0')}}"
+packer_lxc__max_lxc_if:  "{{packer_lxc.max_lxc_if  | d(10)}}"
+packer_lxc__users:       "{{packer_lxc.users       | d([])}}"
+packer_lxc__bindir:      "{{packer_lxc.bindir      | d('/usr/local/bin')}}"
+packer_lxc__user_bindir: "{{packer_lxc.user_bindir | d('.local/bin')}}"
+

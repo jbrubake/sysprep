@@ -1,0 +1,97 @@
+---
+
+- name: Install packages
+  become: yes
+  package:
+    name: "{{_item}}"
+    state: latest
+  loop: "{{packer_lxc__packages}}"
+  loop_control:
+    loop_var: _item
+
+- name: Start services
+  become: yes
+  service:
+    name: lxc-net
+    enabled: true
+    state: started
+
+- name: Add lxc bridge to trusted zone
+  become: yes
+  notify: Reload firewalld
+  firewalld:
+    zone: trusted
+    interface: "{{packer_lxc__lxcbr}}"
+    permanent: true
+    state: enabled
+
+- name: Check for lxc SELinux module
+  become: yes
+  shell: semodule -l | grep '^lxc$'
+  register: _out
+  changed_when: false
+  failed_when: false
+
+- name: Install lxc SELinux module
+  block:
+    - name: Create temporary directory
+      tempfile:
+        state: directory
+        prefix: lxc-
+      register: _tmp
+
+    - name: Upload module
+      copy:
+        src: files/lxc.pp
+        dest: "{{_tmp.path}}/lxc.pp"
+
+    # TODO: This currently fails (Issue #1)
+    # - name: Install module
+      # become: yes
+      # command: semodule -i "{{_tmp.path}}/lxc.pp"
+  when: _out.rc != 0
+
+- name: Create /etc/subuid entry
+  become: yes
+  lineinfile:
+    path: /etc/subuid
+    regexp: "^{{_item}}"
+    line: "{{_item}}:{{packer_lxc__id_start}}:{{packer_lxc__id_num}}"
+  loop: "{{packer_lxc__users}}"
+  loop_control:
+    loop_var: _item
+
+- name: Create /etc/subgid entry
+  become: yes
+  lineinfile:
+    path: /etc/subgid
+    regexp: "^{{_item}}"
+    line: "{{_item}}:{{packer_lxc__id_start}}:{{packer_lxc__id_num}}"
+  loop: "{{packer_lxc__users}}"
+  loop_control:
+    loop_var: _item
+
+- name: Make sure /etc/lxc/lxc-usernet exists
+  become: yes
+  copy:
+    content: ''
+    dest: /etc/lxc/lxc-usernet
+    force: false
+
+- name: Create /etc/lxc/lxc-usernet entry
+  become: yes
+  lineinfile:
+    path: /etc/lxc/lxc-usernet
+    regexp: "^{{_item}}"
+    line: "{{_item}} veth {{packer_lxc__lxcbr}} {{packer_lxc__max_lxc_if}}"
+  loop: "{{packer_lxc__users}}"
+  loop_control:
+    loop_var: _item
+
+- name: Install tar(1) wrapper
+  become: yes
+  copy:
+    src: "{{packer_lxc__tar_wrapper}}"
+    dest: "{{packer_lxc__bindir}}"
+    mode: '0755'
+
